@@ -215,18 +215,18 @@
     " To disable the stripping of whitespace, add the following to your
     " .vimrc.before.local file:
     "   let g:spf13_keep_trailing_whitespace = 1
-    autocmd FileType c,cpp,java,go,php,javascript,python,twig,xml,yml autocmd BufWritePre <buffer> if !exists('g:spf13_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
+    autocmd FileType c,cpp,java,go,javascript,python,xml,md,asy autocmd BufWritePre <buffer> if !exists('g:spf13_keep_trailing_whitespace') | call StripTrailingWhitespace() | endif
     "autocmd FileType go autocmd BufWritePre <buffer> Fmt
-    autocmd BufNewFile,BufRead *.html.twig set filetype=html.twig
-    autocmd FileType haskell setlocal expandtab shiftwidth=2 softtabstop=2
+    "autocmd BufNewFile,BufRead *.html.twig set filetype=html.twig
+    "autocmd FileType haskell setlocal expandtab shiftwidth=2 softtabstop=2
     " preceding line best in a plugin but here for now.
 
-    autocmd BufNewFile,BufRead *.coffee set filetype=coffee
+    "autocmd BufNewFile,BufRead *.coffee set filetype=coffee
 
     " Workaround vim-commentary for Haskell
-    autocmd FileType haskell setlocal commentstring=--\ %s
+    "autocmd FileType haskell setlocal commentstring=--\ %s
     " Workaround broken colour highlighting in Haskell
-    autocmd FileType haskell setlocal nospell
+    "autocmd FileType haskell setlocal nospell
 
 " }
 
@@ -262,6 +262,11 @@
     " Wrapped lines goes down/up to next row, rather than next line in file.
     noremap j gj
     noremap k gk
+
+    " take it easy to `ESC'
+    imap kj <ESC>
+
+    nmap ; :
 
     " End/Start of line motion keys act relative to row/wrap width in the
     " presence of `:set wrap`, and relative to line for `:set nowrap`.
