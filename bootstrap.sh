@@ -1,12 +1,4 @@
-#!/usr/bin/env bash
-############################  SETUP PARAMETERS
-app_name='spf13-vim'
-app_dir="$HOME/.spf13-vim-3"
-[ -z "$git_uri" ] && git_uri='https://github.com/qiupin/spf13-vim.git'
-git_branch='3.0'
-debug_mode='0'
-fork_maintainer='0'
-[ -z "$VUNDLE_URI" ] && VUNDLE_URI="https://github.com/gmarik/vundle.git"
+#!/usr/bin/env sh
 
 ############################  BASIC SETUP TOOLS
 msg() {

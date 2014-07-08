@@ -34,7 +34,9 @@ The goal has always been to add functionality without changing all the features,
 
 # Installation
 
-## Linux, \*nix, Mac OSX Installation
+    curl http://j.mp/spf13-vim -o - | sh
+ 
+or
 
 The easiest way to install spf13-vim is to use our [automatic installer](https://j.mp/spf13-vim3) by simply copying and pasting the following line into a terminal. This will install spf13-vim and backup your existing vim configuration. If you are upgrading from a prior version (before 3.0) this is also the recommended installation.
 
@@ -492,6 +494,7 @@ Here's some tips if you've never used VIM before:
 * Certain commands are prefixed with a `<Leader>` key, which by default maps to `\`.
   Spf13-vim uses `let mapleader = ","` to change this to `,` which is in a consistent and
   convenient location.
+<<<<<<< HEAD
 * Keyboard [cheat sheet](https://walking-without-crutches.heroku.com/image/images/vi-vim-cheat-sheet.png).
 
 [![Analytics](https://ga-beacon.appspot.com/UA-7131036-5/spf13-vim/readme)](https://github.com/igrigorik/ga-beacon)
@@ -539,3 +542,11 @@ Here's some tips if you've never used VIM before:
 [phpmanual-img]:https://i.imgur.com/c0GGP.png
 [easymotion-img]:https://i.imgur.com/ZsrVL.png
 [airline-img]:https://i.imgur.com/D4ZYADr.png
+=======
+* Keyboard [cheat sheet](http://walking-without-crutches.heroku.com/image/images/vi-vim-cheat-sheet.png).
+
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/spf13/spf13-vim/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
+>>>>>>> spf13-vim/master

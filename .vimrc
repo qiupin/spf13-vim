@@ -117,25 +117,39 @@
         augroup END
     endif
 
-    " Setting up the directories {
-        set backup                  " Backups are nice ...
-        if has('persistent_undo')
-            set undofile                " So is persistent undo ...
-            set undolevels=1000         " Maximum number of changes that can be undone
-            set undoreload=10000        " Maximum number lines to save for undo on a buffer reload
-        endif
+	filetype plugin indent on  	" Automatically detect file types.
+	syntax on 					" syntax highlighting
+	set mouse=a					" automatically enable mouse usage
+	"set autochdir 				" always switch to the current file directory.. Messes with some plugins, best left commented out
+	" not every vim is compiled with this, use the following line instead
+	" If you use command-t plugin, it conflicts with this, comment it out.
+     "autocmd BufEnter * if bufname("") !~ "^\[A-Za-z0-9\]*://" | lcd %:p:h | endif
+	scriptencoding utf-8
 
-        " To disable views add the following to your .vimrc.before.local file:
-        "   let g:spf13_no_views = 1
-        if !exists('g:spf13_no_views')
-            " Add exclusions to mkview and loadview
-            " eg: *.*, svn-commit.tmp
-            let g:skipview_files = [
-                \ '\[example pattern\]'
-                \ ]
-        endif
-    " }
-
+	" set autowrite                  " automatically write a file when leaving a modified buffer
+	set shortmess+=filmnrxoOtT     	" abbrev. of messages (avoids 'hit enter')
+	set viewoptions=folds,options,cursor,unix,slash " better unix / windows compatibility
+	set virtualedit=onemore 	   	" allow for cursor beyond last character
+	set history=1000  				" Store a ton of history (default is 20)
+	set spell 		 	        	" spell checking on
+	
+	" Setting up the directories {
+		set backup 						" backups are nice ...
+		set undofile					" so is persistent undo ...
+		set undolevels=1000 "maximum number of changes that can be undone
+		set undoreload=10000 "maximum number lines to save for undo on a buffer reload
+        " Moved to function at bottom of the file
+		"set backupdir=$HOME/.vimbackup//  " but not when they clog .
+		"set directory=$HOME/.vimswap// 	" Same for swap files
+		"set viewdir=$HOME/.vimviews// 	" same for view files
+		
+		"" Creating directories if they don't exist
+		"silent execute '!mkdir -p $HVOME/.vimbackup'
+		"silent execute '!mkdir -p $HOME/.vimswap'
+		"silent execute '!mkdir -p $HOME/.vimviews'
+		au BufWinLeave * silent! mkview  "make vim save view (state) (folds, cursor, etc)
+		au BufWinEnter * silent! loadview "make vim load view (state) (folds, cursor, etc)
+	" }
 " }
 
 " Vim UI {
@@ -259,6 +273,12 @@
         map <C-H> <C-W>h<C-W>_
     endif
 
+	" Easier moving in tabs and windows
+	map <C-J> <C-W>j<C-W>_
+	map <C-K> <C-W>k<C-W>_
+	map <C-L> <C-W>l<C-W>_
+	map <C-H> <C-W>h<C-W>_
+	
     " Wrapped lines goes down/up to next row, rather than next line in file.
     noremap j gj
     noremap k gk
@@ -409,674 +429,269 @@
 
 " Plugins {
 
-    " TextObj Sentence {
-        if count(g:spf13_bundle_groups, 'writing')
-            augroup textobj_sentence
-              autocmd!
-              autocmd FileType markdown call textobj#sentence#init()
-              autocmd FileType textile call textobj#sentence#init()
-              autocmd FileType text call textobj#sentence#init()
-            augroup END
+	" VCSCommand {
+"		let b:VCSCommandMapPrefix=',v'
+"		let b:VCSCommandVCSType='git'
+	" } 
+	
+	" PIV {
+		let g:DisableAutoPHPFolding = 0
+		"let cfu=phpcomplete#CompletePHP
+	" }
+	
+	" Supertab {
+		let g:SuperTabDefaultCompletionType = "context"
+		let g:SuperTabContextDefaultCompletionType = "<c-x><c-o>"
+	" }
+
+	" Misc { 
+		:map <C-F10> <Esc>:vsp<CR>:VTree<CR>
+		" map Control + F10 to Vtree
+
+        noremap <leader><F5> :CheckSyntax<cr>
+		let g:checksyntax_auto = 1
+
+		"comment out line(s) in visual mode -RB: If you do this, you can't
+        "switch sides of the comment block in visual mode.
+		"vmap  o  :call NERDComment(1, 'toggle')<CR>
+		let g:NERDShutUp=1
+
+		let b:match_ignorecase = 1
+	" }
+	
+	" ShowMarks {
+		let showmarks_include = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		" Don't leave on by default, use :ShowMarksOn to enable
+		let g:showmarks_enable = 0
+		" For marks a-z
+		highlight ShowMarksHLl gui=bold guibg=LightBlue guifg=Blue
+		" For marks A-Z
+		highlight ShowMarksHLu gui=bold guibg=LightRed guifg=DarkRed
+		" For all other marks
+		highlight ShowMarksHLo gui=bold guibg=LightYellow guifg=DarkYellow
+		" For multiple marks on the same line.
+		highlight ShowMarksHLm gui=bold guibg=LightGreen guifg=DarkGreen
+	" }
+	
+	" Command-t {
+        let g:CommandTSearchPath = $HOME . '/Code'
+	" }
+
+	" OmniComplete {
+		"if has("autocmd") && exists("+omnifunc")
+			"autocmd Filetype *
+				"\if &omnifunc == "" |
+				"\setlocal omnifunc=syntaxcomplete#Complete |
+				"\endif
+		"endif
+
+		" Popup menu hightLight Group
+		"highlight Pmenu	ctermbg=13	guibg=DarkBlue
+        "highlight PmenuSel	ctermbg=7	guibg=DarkBlue		guifg=LightBlue
+		"highlight PmenuSbar ctermbg=7	guibg=DarkGray
+		"highlight PmenuThumb			guibg=Black
+
+		hi Pmenu  guifg=#000000 guibg=#F8F8F8 ctermfg=black ctermbg=Lightgray
+		hi PmenuSbar  guifg=#8A95A7 guibg=#F8F8F8 gui=NONE ctermfg=darkcyan ctermbg=lightgray cterm=NONE
+		hi PmenuThumb  guifg=#F8F8F8 guibg=#8A95A7 gui=NONE ctermfg=lightgray ctermbg=darkcyan cterm=NONE
+
+		" some convenient mappings 
+		inoremap <expr> <Esc>      pumvisible() ? "\<C-e>" : "\<Esc>"
+		inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"
+		inoremap <expr> <Down>     pumvisible() ? "\<C-n>" : "\<Down>"
+		inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
+		inoremap <expr> <C-d>	   pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<C-d>"
+		inoremap <expr> <C-u>      pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<C-u>"
+
+        " and make sure that it doesn't break supertab
+        let g:SuperTabCrMapping = 0
+        
+		" automatically open and close the popup menu / preview window
+		au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
+		set completeopt=menu,preview,longest
+	" }
+	
+	" Ctags {
+    " This will look in the current directory for 'tags', and work up the tree towards root until one is found. 
+		set tags=./tags;/,$HOME/vimtags
+        map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR> " C-\ - Open the definition in a new tab
+        map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>      " A-] - Open the definition in a vertical split
+	" }
+
+	" EasyTags {
+       " Disabling for now. It doesn't work well on large tag files 
+        let g:loaded_easytags = 1  " Disable until it's working better
+		let g:easytags_cmd = 'ctags'
+        let g:easytags_dynamic_files = 1
+		if !has('win32') && !has('win64')
+            let g:easytags_resolve_links = 1
         endif
-    " }
+	" }
 
-    " TextObj Quote {
-        if count(g:spf13_bundle_groups, 'writing')
-            augroup textobj_quote
-                autocmd!
-                autocmd FileType markdown call textobj#quote#init()
-                autocmd FileType textile call textobj#quote#init()
-                autocmd FileType text call textobj#quote#init({'educate': 0})
-            augroup END
-        endif
-    " }
+	" Delimitmate {
+		au FileType * let b:delimitMate_autoclose = 1
 
-    " PIV {
-        let g:DisableAutoPHPFolding = 0
-        let g:PIVAutoClose = 0
-    " }
+		" If using html auto complete (complete closing tag)
+        au FileType xml,html,xhtml let b:delimitMate_matchpairs = "(:),[:],{:}"
+	" }
+	
+	" AutoCloseTag {
+		" Make it so AutoCloseTag works for xml and xhtml files as well
+		au FileType xhtml,xml ru ftplugin/html/autoclosetag.vim
+	" }
 
-    " Misc {
-        let g:NERDShutUp=1
-        let b:match_ignorecase = 1
-    " }
-
-    " OmniComplete {
-        " To disable omni complete, add the following to your .vimrc.before.local file:
-        "   let g:spf13_no_omni_complete = 1
-        if !exists('g:spf13_no_omni_complete')
-            if has("autocmd") && exists("+omnifunc")
-                autocmd Filetype *
-                    \if &omnifunc == "" |
-                    \setlocal omnifunc=syntaxcomplete#Complete |
-                    \endif
-            endif
-
-            hi Pmenu  guifg=#000000 guibg=#F8F8F8 ctermfg=black ctermbg=Lightgray
-            hi PmenuSbar  guifg=#8A95A7 guibg=#F8F8F8 gui=NONE ctermfg=darkcyan ctermbg=lightgray cterm=NONE
-            hi PmenuThumb  guifg=#F8F8F8 guibg=#8A95A7 gui=NONE ctermfg=lightgray ctermbg=darkcyan cterm=NONE
-
-            " Some convenient mappings
-            inoremap <expr> <Esc>      pumvisible() ? "\<C-e>" : "\<Esc>"
-            inoremap <expr> <CR>       pumvisible() ? "\<C-y>" : "\<CR>"
-            inoremap <expr> <Down>     pumvisible() ? "\<C-n>" : "\<Down>"
-            inoremap <expr> <Up>       pumvisible() ? "\<C-p>" : "\<Up>"
-            inoremap <expr> <C-d>      pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<C-d>"
-            inoremap <expr> <C-u>      pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<C-u>"
-
-            " Automatically open and close the popup menu / preview window
-            au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
-            set completeopt=menu,preview,longest
-        endif
-    " }
-
-    " Ctags {
-        set tags=./tags;/,~/.vimtags
-
-        " Make tags placed in .git/tags file available in all levels of a repository
-        let gitroot = substitute(system('git rev-parse --show-toplevel'), '[\n\r]', '', 'g')
-        if gitroot != ''
-            let &tags = &tags . ',' . gitroot . '/.git/tags'
-        endif
-    " }
-
-    " AutoCloseTag {
-        " Make it so AutoCloseTag works for xml and xhtml files as well
-        au FileType xhtml,xml ru ftplugin/html/autoclosetag.vim
-        nmap <Leader>ac <Plug>ToggleAutoCloseMappings
-    " }
-
-    " SnipMate {
-        " Setting the author var
+	" SnipMate {
+		" Setting the author var
         " If forking, please overwrite in your .vimrc.local file
-        let g:snips_author = 'Steve Francia <steve.francia@gmail.com>'
-    " }
+		let g:snips_author = 'Steve Francia <steve.francia@gmail.com>'
+		" Shortcut for reloading snippets, useful when developing
+		nnoremap ,smr <esc>:exec ReloadAllSnippets()<cr>
+	" }
 
-    " NerdTree {
-        map <C-e> <plug>NERDTreeTabsToggle<CR>
-        map <leader>e :NERDTreeFind<CR>
-        nmap <leader>nt :NERDTreeFind<CR>
+	" NerdTree {
+		map <C-e> :NERDTreeToggle<CR>:NERDTreeMirror<CR>
+		map <leader>e :NERDTreeFind<CR>
+		nmap <leader>nt :NERDTreeFind<CR>
 
-        let NERDTreeShowBookmarks=1
-        let NERDTreeIgnore=['\.pyc', '\~$', '\.swo$', '\.swp$', '\.git', '\.hg', '\.svn', '\.bzr']
-        let NERDTreeChDirMode=0
-        let NERDTreeQuitOnOpen=1
-        let NERDTreeMouseMode=2
-        let NERDTreeShowHidden=1
-        let NERDTreeKeepTreeInNewTab=1
-        let g:nerdtree_tabs_open_on_gui_startup=0
-    " }
-
+		let NERDTreeShowBookmarks=1
+		let NERDTreeIgnore=['\.pyc', '\~$', '\.swo$', '\.swp$', '\.git', '\.hg', '\.svn', '\.bzr']
+		let NERDTreeChDirMode=0
+		let NERDTreeQuitOnOpen=1
+		let NERDTreeShowHidden=1
+		let NERDTreeKeepTreeInNewTab=1
+	" }
+    
     " Tabularize {
-        nmap <Leader>a& :Tabularize /&<CR>
-        vmap <Leader>a& :Tabularize /&<CR>
-        nmap <Leader>a= :Tabularize /=<CR>
-        vmap <Leader>a= :Tabularize /=<CR>
-        nmap <Leader>a: :Tabularize /:<CR>
-        vmap <Leader>a: :Tabularize /:<CR>
-        nmap <Leader>a:: :Tabularize /:\zs<CR>
-        vmap <Leader>a:: :Tabularize /:\zs<CR>
-        nmap <Leader>a, :Tabularize /,<CR>
-        vmap <Leader>a, :Tabularize /,<CR>
-        nmap <Leader>a,, :Tabularize /,\zs<CR>
-        vmap <Leader>a,, :Tabularize /,\zs<CR>
-        nmap <Leader>a<Bar> :Tabularize /<Bar><CR>
-        vmap <Leader>a<Bar> :Tabularize /<Bar><CR>
-    " }
-
-    " Session List {
-        set sessionoptions=blank,buffers,curdir,folds,tabpages,winsize
-        nmap <leader>sl :SessionList<CR>
-        nmap <leader>ss :SessionSave<CR>
-        nmap <leader>sc :SessionClose<CR>
-    " }
-
-    " JSON {
-        nmap <leader>jt <Esc>:%!python -m json.tool<CR><Esc>:set filetype=json<CR>
-    " }
-
-    " PyMode {
-        let g:pymode_lint_checker = "pyflakes"
-        let g:pymode_utils_whitespaces = 0
-        let g:pymode_options = 0
-    " }
-
-    " ctrlp {
-        let g:ctrlp_working_path_mode = 'ra'
-        nnoremap <silent> <D-t> :CtrlP<CR>
-        nnoremap <silent> <D-r> :CtrlPMRU<CR>
-        let g:ctrlp_custom_ignore = {
-            \ 'dir':  '\.git$\|\.hg$\|\.svn$',
-            \ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$' }
-
-        " On Windows use "dir" as fallback command.
-        if WINDOWS()
-            let s:ctrlp_fallback = 'dir %s /-n /b /s /a-d'
-        elseif executable('ag')
-            let s:ctrlp_fallback = 'ag %s --nocolor -l -g ""'
-        elseif executable('ack')
-            let s:ctrlp_fallback = 'ack %s --nocolor -f'
-        else
-            let s:ctrlp_fallback = 'find %s -type f'
+        if exists(":Tabularize")
+          nmap <Leader>a= :Tabularize /=<CR>
+          vmap <Leader>a= :Tabularize /=<CR>
+          nmap <Leader>a: :Tabularize /:<CR>
+          vmap <Leader>a: :Tabularize /:<CR>
+          nmap <Leader>a:: :Tabularize /:\zs<CR>
+          vmap <Leader>a:: :Tabularize /:\zs<CR>
+          nmap <Leader>a, :Tabularize /,<CR>
+          vmap <Leader>a, :Tabularize /,<CR>
+          nmap <Leader>a<Bar> :Tabularize /<Bar><CR>
+          vmap <Leader>a<Bar> :Tabularize /<Bar><CR>
         endif
-        let g:ctrlp_user_command = {
-            \ 'types': {
-                \ 1: ['.git', 'cd %s && git ls-files . --cached --exclude-standard --others'],
-                \ 2: ['.hg', 'hg --cwd %s locate -I .'],
-            \ },
-            \ 'fallback': s:ctrlp_fallback
-        \ }
-    "}
-
-    " TagBar {
-        nnoremap <silent> <leader>tt :TagbarToggle<CR>
-
-        " If using go please install the gotags program using the following
-        " go install github.com/jstemmer/gotags
-        " And make sure gotags is in your path
-        let g:tagbar_type_go = {
-            \ 'ctagstype' : 'go',
-            \ 'kinds'     : [  'p:package', 'i:imports:1', 'c:constants', 'v:variables',
-                \ 't:types',  'n:interfaces', 'w:fields', 'e:embedded', 'm:methods',
-                \ 'r:constructor', 'f:functions' ],
-            \ 'sro' : '.',
-            \ 'kind2scope' : { 't' : 'ctype', 'n' : 'ntype' },
-            \ 'scope2kind' : { 'ctype' : 't', 'ntype' : 'n' },
-            \ 'ctagsbin'  : 'gotags',
-            \ 'ctagsargs' : '-sort -silent'
-            \ }
-    "}
-
-    " PythonMode {
-        " Disable if python support not present
-        if !has('python')
-            let g:pymode = 0
-        endif
-    " }
-
-    " Fugitive {
-        nnoremap <silent> <leader>gs :Gstatus<CR>
-        nnoremap <silent> <leader>gd :Gdiff<CR>
-        nnoremap <silent> <leader>gc :Gcommit<CR>
-        nnoremap <silent> <leader>gb :Gblame<CR>
-        nnoremap <silent> <leader>gl :Glog<CR>
-        nnoremap <silent> <leader>gp :Git push<CR>
-        nnoremap <silent> <leader>gr :Gread<CR>
-        nnoremap <silent> <leader>gw :Gwrite<CR>
-        nnoremap <silent> <leader>ge :Gedit<CR>
-        " Mnemonic _i_nteractive
-        nnoremap <silent> <leader>gi :Git add -p %<CR>
-        nnoremap <silent> <leader>gg :SignifyToggle<CR>
-    "}
-
-    " YouCompleteMe {
-        if count(g:spf13_bundle_groups, 'youcompleteme')
-            let g:acp_enableAtStartup = 0
-
-            " enable completion from tags
-            let g:ycm_collect_identifiers_from_tags_files = 1
-
-            " remap Ultisnips for compatibility for YCM
-            let g:UltiSnipsExpandTrigger = '<C-j>'
-            let g:UltiSnipsJumpForwardTrigger = '<C-j>'
-            let g:UltiSnipsJumpBackwardTrigger = '<C-k>'
-
-            " Enable omni completion.
-            autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-            autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-            autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-            autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-            autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-            autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
-            autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
-
-            " Haskell post write lint and check with ghcmod
-            " $ `cabal install ghcmod` if missing and ensure
-            " ~/.cabal/bin is in your $PATH.
-            if !executable("ghcmod")
-                autocmd BufWritePost *.hs GhcModCheckAndLintAsync
-            endif
-
-            " For snippet_complete marker.
-            if !exists("g:spf13_no_conceal")
-                if has('conceal')
-                    set conceallevel=2 concealcursor=i
-                endif
-            endif
-
-            " Disable the neosnippet preview candidate window
-            " When enabled, there can be too much visual noise
-            " especially when splits are used.
-            set completeopt-=preview
-        endif
-    " }
-
-    " neocomplete {
-        if count(g:spf13_bundle_groups, 'neocomplete')
-            let g:acp_enableAtStartup = 0
-            let g:neocomplete#enable_at_startup = 1
-            let g:neocomplete#enable_smart_case = 1
-            let g:neocomplete#enable_auto_delimiter = 1
-            let g:neocomplete#max_list = 15
-            let g:neocomplete#force_overwrite_completefunc = 1
+     " }
 
 
-            " Define dictionary.
-            let g:neocomplete#sources#dictionary#dictionaries = {
-                        \ 'default' : '',
-                        \ 'vimshell' : $HOME.'/.vimshell_hist',
-                        \ 'scheme' : $HOME.'/.gosh_completions'
-                        \ }
+	" Richard's plugins {
+		" Fuzzy Finder {
+			""" Fuzzy Find file, tree, buffer, line
+			nmap <leader>ff :FufFile **/<CR>
+			nmap <leader>ft :FufFile<CR>
+			nmap <leader>fb :FufBuffer<CR>
+			nmap <leader>fl :FufLine<CR>
+			nmap <leader>fr :FufRenewCache<CR>
+		" }
 
-            " Define keyword.
-            if !exists('g:neocomplete#keyword_patterns')
-                let g:neocomplete#keyword_patterns = {}
-            endif
-            let g:neocomplete#keyword_patterns['default'] = '\h\w*'
+		" Session List {
+			set sessionoptions=blank,buffers,curdir,folds,tabpages,winsize
+			nmap <leader>sl :SessionList<CR>
+			nmap <leader>ss :SessionSave<CR>
+		" }
+		
+		" Buffer explorer {
+			nmap <leader>b :BufExplorer<CR>
+		" }
+		
+		" VCS commands {
+			nmap <leader>vs :VCSStatus<CR>
+			nmap <leader>vc :VCSCommit<CR>
+			nmap <leader>vb :VCSBlame<CR>
+			nmap <leader>va :VCSAdd<CR>
+			nmap <leader>vd :VCSVimDiff<CR>
+			nmap <leader>vl :VCSLog<CR>
+			nmap <leader>vu :VCSUpdate<CR>
+		" }
+		" php-doc commands {
+			nmap <leader>pd :call PhpDocSingle()<CR>
+			vmap <leader>pd :call PhpDocRange()<CR>
+		" }
+		
+		" Debugging with VimDebugger {
+			map <F11> :DbgStepInto<CR>
+			map <F10> :DbgStepOver<CR>
+			map <S-F11> :DbgStepOut<CR>
+			map <F5> :DbgRun<CR>
+			map <F6> :DbgDetach<CR>
+			map <F8> :DbgToggleBreakpoint<CR>
+			map <S-F8> :DbgFlushBreakpoints<CR>
+			map <F9> :DbgRefreshWatch<CR>
+			map <S-F9> :DbgAddWatch<CR>
+		" }
 
-            " Plugin key-mappings {
-                " These two lines conflict with the default digraph mapping of <C-K>
-                if !exists('g:spf13_no_neosnippet_expand')
-                    imap <C-k> <Plug>(neosnippet_expand_or_jump)
-                    smap <C-k> <Plug>(neosnippet_expand_or_jump)
-                endif
-                if exists('g:spf13_noninvasive_completion')
-                    iunmap <CR>
-                    " <ESC> takes you out of insert mode
-                    inoremap <expr> <Esc>   pumvisible() ? "\<C-y>\<Esc>" : "\<Esc>"
-                    " <CR> accepts first, then sends the <CR>
-                    inoremap <expr> <CR>    pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
-                    " <Down> and <Up> cycle like <Tab> and <S-Tab>
-                    inoremap <expr> <Down>  pumvisible() ? "\<C-n>" : "\<Down>"
-                    inoremap <expr> <Up>    pumvisible() ? "\<C-p>" : "\<Up>"
-                    " Jump up and down the list
-                    inoremap <expr> <C-d>   pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<C-d>"
-                    inoremap <expr> <C-u>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<C-u>"
-                else
-                    " <C-k> Complete Snippet
-                    " <C-k> Jump to next snippet point
-                    imap <silent><expr><C-k> neosnippet#expandable() ?
-                                \ "\<Plug>(neosnippet_expand_or_jump)" : (pumvisible() ?
-                                \ "\<C-e>" : "\<Plug>(neosnippet_expand_or_jump)")
-                    smap <TAB> <Right><Plug>(neosnippet_jump_or_expand)
+		" Taglist Variables {
+			let Tlist_Auto_Highlight_Tag = 1
+			let Tlist_Auto_Update = 1
+			let Tlist_Exit_OnlyWindow = 1
+			let Tlist_File_Fold_Auto_Close = 1
+			let Tlist_Highlight_Tag_On_BufEnter = 1
+			let Tlist_Use_Right_Window = 1
+			let Tlist_Use_SingleClick = 1
 
-                    inoremap <expr><C-g> neocomplete#undo_completion()
-                    inoremap <expr><C-l> neocomplete#complete_common_string()
-                    "inoremap <expr><CR> neocomplete#complete_common_string()
+			let g:ctags_statusline=1
+			" Override how taglist does javascript
+			let g:tlist_javascript_settings = 'javascript;f:function;c:class;m:method;p:property;v:global'
+		 " }
 
-                    " <CR>: close popup
-                    " <s-CR>: close popup and save indent.
-                    inoremap <expr><s-CR> pumvisible() ? neocomplete#close_popup()"\<CR>" : "\<CR>"
-                    "inoremap <expr><CR> pumvisible() ? neocomplete#close_popup() : "\<CR>"
-
-                    function! CleverCr()
-                        if pumvisible()
-                            if neosnippet#expandable()
-                                let exp = "\<Plug>(neosnippet_expand)"
-                                return exp . neocomplete#close_popup()
-                            else
-                                return neocomplete#close_popup()
-                            endif
-                        else
-                            return "\<CR>"
-                        endif
-                    endfunction
-
-                    " <CR> close popup and save indent or expand snippet 
-                    imap <expr> <CR> CleverCr() 
-                    " <C-h>, <BS>: close popup and delete backword char.
-                    inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
-                    inoremap <expr><C-y> neocomplete#close_popup()
-                endif
-                " <TAB>: completion.
-                inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-                inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<TAB>"
-
-                " Courtesy of Matteo Cavalleri
-
-                function! CleverTab()
-                    if pumvisible()
-                        return "\<C-n>"
-                    endif 
-                    let substr = strpart(getline('.'), 0, col('.') - 1)
-                    let substr = matchstr(substr, '[^ \t]*$')
-                    if strlen(substr) == 0
-                        " nothing to match on empty string
-                        return "\<Tab>"
-                    else
-                        " existing text matching
-                        if neosnippet#expandable_or_jumpable()
-                            return "\<Plug>(neosnippet_expand_or_jump)"
-                        else
-                            return neocomplete#start_manual_complete()
-                        endif
-                    endif
-                endfunction
-
-                imap <expr> <Tab> CleverTab()
-            " }
-
-            " Enable heavy omni completion.
-            if !exists('g:neocomplete#sources#omni#input_patterns')
-                let g:neocomplete#sources#omni#input_patterns = {}
-            endif
-            let g:neocomplete#sources#omni#input_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-            let g:neocomplete#sources#omni#input_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
-            let g:neocomplete#sources#omni#input_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-            let g:neocomplete#sources#omni#input_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-            let g:neocomplete#sources#omni#input_patterns.ruby = '[^. *\t]\.\h\w*\|\h\w*::'
-    " }
-    " neocomplcache {
-        elseif count(g:spf13_bundle_groups, 'neocomplcache')
-            let g:acp_enableAtStartup = 0
-            let g:neocomplcache_enable_at_startup = 1
-            let g:neocomplcache_enable_camel_case_completion = 1
-            let g:neocomplcache_enable_smart_case = 1
-            let g:neocomplcache_enable_underbar_completion = 1
-            let g:neocomplcache_enable_auto_delimiter = 1
-            let g:neocomplcache_max_list = 15
-            let g:neocomplcache_force_overwrite_completefunc = 1
-
-            " Define dictionary.
-            let g:neocomplcache_dictionary_filetype_lists = {
-                        \ 'default' : '',
-                        \ 'vimshell' : $HOME.'/.vimshell_hist',
-                        \ 'scheme' : $HOME.'/.gosh_completions'
-                        \ }
-
-            " Define keyword.
-            if !exists('g:neocomplcache_keyword_patterns')
-                let g:neocomplcache_keyword_patterns = {}
-            endif
-            let g:neocomplcache_keyword_patterns._ = '\h\w*'
-
-            " Plugin key-mappings {
-                " These two lines conflict with the default digraph mapping of <C-K>
-                imap <C-k> <Plug>(neosnippet_expand_or_jump)
-                smap <C-k> <Plug>(neosnippet_expand_or_jump)
-                if exists('g:spf13_noninvasive_completion')
-                    iunmap <CR>
-                    " <ESC> takes you out of insert mode
-                    inoremap <expr> <Esc>   pumvisible() ? "\<C-y>\<Esc>" : "\<Esc>"
-                    " <CR> accepts first, then sends the <CR>
-                    inoremap <expr> <CR>    pumvisible() ? "\<C-y>\<CR>" : "\<CR>"
-                    " <Down> and <Up> cycle like <Tab> and <S-Tab>
-                    inoremap <expr> <Down>  pumvisible() ? "\<C-n>" : "\<Down>"
-                    inoremap <expr> <Up>    pumvisible() ? "\<C-p>" : "\<Up>"
-                    " Jump up and down the list
-                    inoremap <expr> <C-d>   pumvisible() ? "\<PageDown>\<C-p>\<C-n>" : "\<C-d>"
-                    inoremap <expr> <C-u>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<C-u>"
-                else
-                    imap <silent><expr><C-k> neosnippet#expandable() ?
-                                \ "\<Plug>(neosnippet_expand_or_jump)" : (pumvisible() ?
-                                \ "\<C-e>" : "\<Plug>(neosnippet_expand_or_jump)")
-                    smap <TAB> <Right><Plug>(neosnippet_jump_or_expand)
-
-                    inoremap <expr><C-g> neocomplcache#undo_completion()
-                    inoremap <expr><C-l> neocomplcache#complete_common_string()
-                    "inoremap <expr><CR> neocomplcache#complete_common_string()
-
-                    function! CleverCr()
-                        if pumvisible()
-                            if neosnippet#expandable()
-                                let exp = "\<Plug>(neosnippet_expand)"
-                                return exp . neocomplcache#close_popup()
-                            else
-                                return neocomplcache#close_popup()
-                            endif
-                        else
-                            return "\<CR>"
-                        endif
-                    endfunction
-
-                    " <CR> close popup and save indent or expand snippet 
-                    imap <expr> <CR> CleverCr()
-
-                    " <CR>: close popup
-                    " <s-CR>: close popup and save indent.
-                    inoremap <expr><s-CR> pumvisible() ? neocomplcache#close_popup()"\<CR>" : "\<CR>"
-                    "inoremap <expr><CR> pumvisible() ? neocomplcache#close_popup() : "\<CR>"
-
-                    " <C-h>, <BS>: close popup and delete backword char.
-                    inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
-                    inoremap <expr><C-y> neocomplcache#close_popup()
-                endif
-                " <TAB>: completion.
-                inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
-                inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<TAB>"
-            " }
-
-            " Enable omni completion.
-            autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-            autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-            autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-            autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-            autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-            autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
-            autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
-
-            " Enable heavy omni completion.
-            if !exists('g:neocomplcache_omni_patterns')
-                let g:neocomplcache_omni_patterns = {}
-            endif
-            let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-            let g:neocomplcache_omni_patterns.perl = '\h\w*->\h\w*\|\h\w*::'
-            let g:neocomplcache_omni_patterns.c = '[^.[:digit:] *\t]\%(\.\|->\)'
-            let g:neocomplcache_omni_patterns.cpp = '[^.[:digit:] *\t]\%(\.\|->\)\|\h\w*::'
-            let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\h\w*\|\h\w*::'
-    " }
-    " Normal Vim omni-completion {
-    " To disable omni complete, add the following to your .vimrc.before.local file:
-    "   let g:spf13_no_omni_complete = 1
-        elseif !exists('g:spf13_no_omni_complete')
-            " Enable omni-completion.
-            autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-            autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-            autocmd FileType javascript setlocal omnifunc=javascriptcomplete#CompleteJS
-            autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-            autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-            autocmd FileType ruby setlocal omnifunc=rubycomplete#Complete
-            autocmd FileType haskell setlocal omnifunc=necoghc#omnifunc
-
-        endif
-    " }
-
-    " Snippets {
-        if count(g:spf13_bundle_groups, 'neocomplcache') ||
-                    \ count(g:spf13_bundle_groups, 'neocomplete')
-
-            " Use honza's snippets.
-            let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
-
-            " Enable neosnippet snipmate compatibility mode
-            let g:neosnippet#enable_snipmate_compatibility = 1
-
-            " For snippet_complete marker.
-            if !exists("g:spf13_no_conceal")
-                if has('conceal')
-                    set conceallevel=2 concealcursor=i
-                endif
-            endif
-
-            " Enable neosnippets when using go
-            let g:go_snippet_engine = "neosnippet"
-
-            " Disable the neosnippet preview candidate window
-            " When enabled, there can be too much visual noise
-            " especially when splits are used.
-            set completeopt-=preview
-        endif
-    " }
-
-    " FIXME: Isn't this for Syntastic to handle?
-    " Haskell post write lint and check with ghcmod
-    " $ `cabal install ghcmod` if missing and ensure
-    " ~/.cabal/bin is in your $PATH.
-    if !executable("ghcmod")
-        autocmd BufWritePost *.hs GhcModCheckAndLintAsync
-    endif
-
-    " UndoTree {
-        nnoremap <Leader>u :UndotreeToggle<CR>
-        " If undotree is opened, it is likely one wants to interact with it.
-        let g:undotree_SetFocusWhenToggle=1
-    " }
-
-    " indent_guides {
-        let g:indent_guides_start_level = 2
-        let g:indent_guides_guide_size = 1
-        let g:indent_guides_enable_on_vim_startup = 1
-    " }
-
-    " vim-airline {
-        " Set configuration options for the statusline plugin vim-airline.
-        " Use the powerline theme and optionally enable powerline symbols.
-        " To use the symbols , , , , , , and .in the statusline
-        " segments add the following to your .vimrc.before.local file:
-        "   let g:airline_powerline_fonts=1
-        " If the previous symbols do not render for you then install a
-        " powerline enabled font.
-
-        " See `:echo g:airline_theme_map` for some more choices
-        " Default in terminal vim is 'dark'
-        if !exists('g:airline_theme')
-            let g:airline_theme = 'solarized'
-        endif
-        if !exists('g:airline_powerline_fonts')
-            " Use the default set of separators with a few customizations
-            let g:airline_left_sep='›'  " Slightly fancier than '>'
-            let g:airline_right_sep='‹' " Slightly fancier than '<'
-        endif
-    " }
-
+		" JSON {
+			nmap <leader>jt <Esc>:%!python -m json.tool<CR><Esc>:set filetype=json<CR>
+		 " }
+	" }
 " }
 
 " GUI Settings {
-
-    " GVIM- (here instead of .gvimrc)
-    if has('gui_running')
-        set guioptions-=T           " Remove the toolbar
-        set lines=40                " 40 lines of text instead of 24
-        if !exists("g:spf13_no_big_font")
-            if LINUX() && has("gui_running")
-                set guifont=Andale\ Mono\ Regular\ 16,Menlo\ Regular\ 15,Consolas\ Regular\ 16,Courier\ New\ Regular\ 18
-            elseif OSX() && has("gui_running")
-                set guifont=Andale\ Mono\ Regular:h16,Menlo\ Regular:h15,Consolas\ Regular:h16,Courier\ New\ Regular:h18
-            elseif WINDOWS() && has("gui_running")
-                set guifont=Andale_Mono:h10,Menlo:h10,Consolas:h10,Courier_New:h10
-            endif
-        endif
-    else
-        if &term == 'xterm' || &term == 'screen'
-            set t_Co=256            " Enable 256 colors to stop the CSApprox warning and make xterm vim shine
-        endif
-        "set term=builtin_ansi       " Make arrow and other keys work
-    endif
-
+	" GVIM- (here instead of .gvimrc)
+	if has('gui_running')
+		set guioptions-=T          	" remove the toolbar
+		set lines=40               	" 40 lines of text instead of 24,
+	else
+		set term=builtin_ansi       " Make arrow and other keys work
+	endif
 " }
 
-" Functions {
+function! InitializeDirectories()
+  let separator = "."
+  let parent = $HOME 
+  let prefix = '.vim'
+  let dir_list = { 
+			  \ 'backup': 'backupdir', 
+			  \ 'views': 'viewdir', 
+			  \ 'swap': 'directory', 
+			  \ 'undo': 'undodir' }
 
-    " Initialize directories {
-    function! InitializeDirectories()
-        let parent = $HOME
-        let prefix = 'vim'
-        let dir_list = {
-                    \ 'backup': 'backupdir',
-                    \ 'views': 'viewdir',
-                    \ 'swap': 'directory' }
+  for [dirname, settingname] in items(dir_list)
+	  let directory = parent . '/' . prefix . dirname . "/"
+	  if exists("*mkdir")
+		  if !isdirectory(directory)
+			  call mkdir(directory)
+		  endif
+	  endif
+	  if !isdirectory(directory)
+		  echo "Warning: Unable to create backup directory: " . directory
+		  echo "Try: mkdir -p " . directory
+	  else  
+          let directory = substitute(directory, " ", "\\\\ ", "")
+          exec "set " . settingname . "=" . directory
+	  endif
+  endfor
+endfunction
+call InitializeDirectories() 
 
-        if has('persistent_undo')
-            let dir_list['undo'] = 'undodir'
-        endif
-
-        " To specify a different directory in which to place the vimbackup,
-        " vimviews, vimundo, and vimswap files/directories, add the following to
-        " your .vimrc.before.local file:
-        "   let g:spf13_consolidated_directory = <full path to desired directory>
-        "   eg: let g:spf13_consolidated_directory = $HOME . '/.vim/'
-        if exists('g:spf13_consolidated_directory')
-            let common_dir = g:spf13_consolidated_directory . prefix
-        else
-            let common_dir = parent . '/.' . prefix
-        endif
-
-        for [dirname, settingname] in items(dir_list)
-            let directory = common_dir . dirname . '/'
-            if exists("*mkdir")
-                if !isdirectory(directory)
-                    call mkdir(directory)
-                endif
-            endif
-            if !isdirectory(directory)
-                echo "Warning: Unable to create backup directory: " . directory
-                echo "Try: mkdir -p " . directory
-            else
-                let directory = substitute(directory, " ", "\\\\ ", "g")
-                exec "set " . settingname . "=" . directory
-            endif
-        endfor
-    endfunction
-    call InitializeDirectories()
-    " }
-
-    " Initialize NERDTree as needed {
-    function! NERDTreeInitAsNeeded()
-        redir => bufoutput
-        buffers!
-        redir END
-        let idx = stridx(bufoutput, "NERD_tree")
-        if idx > -1
-            NERDTreeMirror
-            NERDTreeFind
-            wincmd l
-        endif
-    endfunction
-    " }
-
-    " Strip whitespace {
-    function! StripTrailingWhitespace()
-        " Preparation: save last search, and cursor position.
-        let _s=@/
-        let l = line(".")
-        let c = col(".")
-        " do the business:
-        %s/\s\+$//e
-        " clean up: restore previous search history, and cursor position
-        let @/=_s
-        call cursor(l, c)
-    endfunction
-    " }
-
-    " Shell command {
-    function! s:RunShellCommand(cmdline)
-        botright new
-
-        setlocal buftype=nofile
-        setlocal bufhidden=delete
-        setlocal nobuflisted
-        setlocal noswapfile
-        setlocal nowrap
-        setlocal filetype=shell
-        setlocal syntax=shell
-
-        call setline(1, a:cmdline)
-        call setline(2, substitute(a:cmdline, '.', '=', 'g'))
-        execute 'silent $read !' . escape(a:cmdline, '%#')
-        setlocal nomodifiable
-        1
-    endfunction
-
-    command! -complete=file -nargs=+ Shell call s:RunShellCommand(<q-args>)
-    " e.g. Grep current file for <search_term>: Shell grep -Hn <search_term> %
-    " }
-
-" }
-
-" Use fork vimrc if available {
-    if filereadable(expand("~/.vimrc.fork"))
-        source ~/.vimrc.fork
+function! NERDTreeInitAsNeeded()
+    redir => bufoutput
+    buffers!
+    redir END
+    let idx = stridx(bufoutput, "NERD_tree")
+    if idx > -1
+        NERDTreeMirror
+        NERDTreeFind
+        wincmd l
     endif
+endfunction
 " }
 
 " Use local vimrc if available {
