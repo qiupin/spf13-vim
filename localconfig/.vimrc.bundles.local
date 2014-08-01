@@ -1,0 +1,6 @@
+Bundle 'vim-scripts/VimIM'
+Bundle 'hura/vim-asymptote'
+Bundle 'jcf/vim-latex'
+Bundle 'vim-pandoc/vim-pandoc'
+Bundle 'vim-pandoc/vim-pandoc-syntax'
+Bundle 'jrosiek/vim-mark'
